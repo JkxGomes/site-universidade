@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscrição de Aluno</title>
+</head>
+<body>
+    <h1>Inscrição de Aluno</h1>
+    <form id="registrationForm">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required><br><br>
+        
+        <label for="dataNascimento">Data de Nascimento:</label>
+        <input type="date" id="dataNascimento" name="dataNascimento" required><br><br>
+        
+        <label for="cep">CEP:</label>
+        <input type="text" id="cep" name="cep" required><br><br>
+        
+        <label for="cidade">Cidade:</label>
+        <input type="text" id="cidade" name="cidade" disabled><br><br>
+        
+        <label for="curso">Curso:</label>
+        <select id="curso" name="curso" required>
+            <option value="Engenharia">Engenharia</option>
+            <option value="Medicina">Medicina</option>
+            <option value="Direito">Direito</option>
+        </select><br><br>
+
+        <button type="button" onclick="submitForm()">Enviar</button>
+    </form>
+
+    <script>
+        // Função para buscar cidade do CEP
+        document.getElementById('cep').addEventListener('blur', function() {
+            var cep = this.value.replace(/\D/g, '');
+            if (cep.length === 8) {
+                fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.localidade) {
+                            document.getElementById('cidade').value = data.localidade;
+                        } else {
+                            alert('CEP não encontrado!');
+                        }
+                    });
+            }
+        });
+
+        // Função para enviar o formulário
+        function submitForm() {
+            const nome = document.getElementById('nome').value;
+            const dataNascimento = document.getElementById('dataNascimento').value;
+            const cep = document.getElementById('cep').value;
+            const cidade = document.getElementById('cidade').value;
+            const curso = document.getElementById('curso').value;
+
+            const aluno = {
+                nome,
+                dataNascimento,
+                cep,
+                cidade,
+                curso
+            };
+
+            fetch('/student/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(aluno)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Inscrição realizada com sucesso!');
+            })
+            .catch(error => {
+                alert('Erro ao enviar inscrição.');
+            });
+        }
+    </script>
+</body>
+</html>
